@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnHub | Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+
+    <div class="login-wrapper">
+
+        <div class="login-visual">
+            <a href="/" class="login-logo">
+                <span class="logo-icon">🎓</span>
+                Learn<span>Hub</span>
+            </a>
+
+            <div class="login-visual-content">
+                <span class="visual-tag">YOUR LEARNING JOURNEY STARTS HERE</span>
+                <h1>Unlock Your Potential With LearnHub</h1>
+                <p>
+                    Discover new skills, explore courses, test your
+                    knowledge and celebrate your achievements.
+                </p>
+
+                <img
+                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900"
+                    alt="Students learning together"
+                >
+
+                <div class="visual-caption">
+                    📚 Learn today. Lead tomorrow.
+                </div>
+            </div>
+        </div>
+
+        <div class="login-form-side">
+
+            <div class="login-card">
+
+                <div class="login-heading">
+                    <h2>Welcome Back!</h2>
+                    <p>Sign in to continue your learning journey.</p>
+                </div>
+
+                <form id="loginForm">
+
+                    <label>Choose Your Role</label>
+
+                    <div class="role-options">
+                        <button type="button" class="role-btn active"
+                                data-role="student">
+                            🎓 Student
+                        </button>
+
+                        <button type="button" class="role-btn"
+                                data-role="admin">
+                            🛡️ Admin
+                        </button>
+                    </div>
+
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        placeholder="Enter your username"
+                        required
+                    >
+
+                    <label for="password">Password</label>
+
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Enter your password"
+                            required
+                        >
+
+                        <button type="button" id="togglePassword">
+                            Show
+                        </button>
+                    </div>
+
+                    <p id="loginMessage" class="login-message"></p>
+
+                    <button type="submit" class="login-submit">
+                        Sign In →
+                    </button>
+
+                </form>
+
+                <p class="login-footer">
+                    New to LearnHub? Start learning today!
+                </p>
+
+                <a href="/" class="back-home">← Back to Home</a>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let selectedRole = "student";
+
+        const roleButtons = document.querySelectorAll(".role-btn");
+
+        roleButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                roleButtons.forEach(btn => btn.classList.remove("active"));
+
+                this.classList.add("active");
+                selectedRole = this.dataset.role;
+            });
+        });
+
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const password = document.getElementById("password");
+
+            if (password.type === "password") {
+                password.type = "text";
+                this.textContent = "Hide";
+            } else {
+                password.type = "password";
+                this.textContent = "Show";
+            }
+        });
+
+        document.getElementById("loginForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value;
+            const message = document.getElementById("loginMessage");
+            const submitButton = document.querySelector(".login-submit");
+
+            message.textContent = "Signing in...";
+            message.className = "login-message";
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        role: selectedRole
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    message.textContent = "Login successful! Welcome to LearnHub.";
+                    message.className = "login-message success";
+
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 700);
+
+                } else {
+                    message.textContent = data.message || "Invalid username or password.";
+                    message.className = "login-message error";
+                    submitButton.disabled = false;
+                }
+
+            } catch (error) {
+                message.textContent = "Unable to connect. Please try again.";
+                message.className = "login-message error";
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+</html>
